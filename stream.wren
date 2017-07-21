@@ -1,18 +1,22 @@
 class StreamFlags {
-	static readable  { 0x01 }
-	static writeable { 0x02 }
+	static readable       { 0x01 }
+	static writeable      { 0x02 }
+	static exclusiveRead  { 0x04 }
+	static exclusiveWrite { 0x08 }
 }
 
 class Stream {
 	bufferSize { _bufferSize }
 	bytesBuffered { _buffer.bytes.count }
+	exclusiveRead { _flags & StreamFlags.exclusiveRead != 0 }
+	exclusiveWrite { _flags & StreamFlags.exclusiveWrite != 0 }
 	hasBuffered { this.bytesBuffered != 0 }
 	open { _open }
-	readable { _readable }
-	writeable { _writeable }
+	readable { _flags & StreamFlags.readable != 0 }
+	writeable { _flags & StreamFlags.writeable != 0 }
 
 	bufferSize=(n) {
-		if(!_writeable){
+		if(!this.writeable){
 			Fiber.abort("Can only set the buffer size of a writable Stream")
 		}
 
@@ -23,31 +27,18 @@ class Stream {
 		}
 	}
 
-	setup(){
+	construct new(flags){
 		_buffer = ""
 		_bufferSize = 1024
-		_readable = false
-		_writeable = false
-	}
+		_open == null //has not been opened yet
+		_readInterfacesCreated = 0
+		_writeInterfacesCreated = 0
 
-	construct new(){ 
-		setup()
-	}
-
-	construct new(flags){
-		setup()
-
-		if( flags & StreamFlags.readable != 0 ){
-			_readable = true
-		}
-
-		if(flags & StreamFlags.writeable != 0 ){ 
-			_writeable = true
-		}
+		_flags = flags
 	}
 
 	open() {
-		if(_writeable){
+		if(this.writeable){
 			// can we open the Stream from wren land?
 			if(_open == null){
 				_open = true
@@ -58,8 +49,8 @@ class Stream {
 	}
 
 	close() {
-		if(_writeable){
-			// can we open the Stream from wren land?
+		if(this.writeable){
+			// can we close the Stream from wren land?
 			if(_open){
 				_open = false
 			}
@@ -77,9 +68,15 @@ class Stream {
 	}
 
 	writingInterface {
-		if(!_writeable){
+		if(!this.writeable){
 			Fiber.abort("Can not create a writing interface for a non-writeable Stream")
 		}
+
+		if( _writeInterfacesCreated > 0 && this.exclusiveWrite ){
+			Fiber.abord("Can not create multipul writing interfaces for an exclusive-write Stream")
+		}
+
+		_writeInterfacesCreated = _writeInterfacesCreated + 1
 
 		var input = null
 		var unBufferedRemainder = null
@@ -110,9 +107,15 @@ class Stream {
 	}
 
 	readingInterface {
-		if(!_readable){
+		if(!this.readable){
 			Fiber.abort("Can not create a reading interface for a non-readable Stream")
 		}
+
+		if( _readInterfacesCreated > 0 && this.exclusiveread ){
+			Fiber.abord("Can not create multipul reading interfaces for an exclusive-read Stream")
+		}
+
+		_readInterfacesCreated =  _readInterfacesCreated + 1 
 
 		var fiber = Fiber.new {
 			var output = null
