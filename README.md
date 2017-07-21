@@ -4,6 +4,8 @@ _A proposed reference API for wren streams, implemented in wren with no native o
 
 These streams would be used to unify the interface for file/stdin/stdout/network reading and writing.
 
+The hope is that once an API for the `Stream` class is decided on, a partially native implmentation can be made to improve performance.
+
 A refference implementation can be found in `stream.wren`, and an example usage can be found in `main.wren`.
 
 Please have a play about, and try to find any issues/improvments
