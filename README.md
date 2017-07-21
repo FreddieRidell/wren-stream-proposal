@@ -11,3 +11,5 @@ A refference implementation can be found in `stream.wren`, and an example usage 
 Please have a play about, and try to find any issues/improvments
 
 Opening __Issues__ and creating __Pull Requests__ is highly encoraged (and in fact the only reason this repo exists)
+
+I hope that the code is clear, but if there is any confusion please open an issue, or message me on twitter [@FreddieRidell](https://twitter.com/freddieRidell)
