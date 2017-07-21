@@ -7,7 +7,7 @@ var readingInterface = stream.readingInterface
 var writingInterface = stream.writingInterface
 
 var rand = Random.new()
-stream.addListener {
+stream.addWriteListener {
 	var numToRead = rand.int(3, 6)
 	System.print("read: {%(readingInterface.call(numToRead))}")
 }

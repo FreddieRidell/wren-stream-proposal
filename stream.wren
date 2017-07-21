@@ -59,11 +59,11 @@ class Stream {
 		}
 	}
 
-	addListener(fn){
-		if(!_listeners){
-			_listeners = [ fn ]
+	addWriteListener(fn){
+		if(!_writeListeners){
+			_writeListeners = [ fn ]
 		} else {
-			_listeners.add(fn)
+			_writeListeners.add(fn)
 		}
 	}
 
@@ -94,7 +94,7 @@ class Stream {
 					unBufferedRemainder = input[spaceLeftInBuffer..-1]
 				}
 
-				_listeners.each { | fn | fn.call() }
+				_writeListeners.each { | fn | fn.call() }
 
 				input = Fiber.yield(unBufferedRemainder)
 			}
