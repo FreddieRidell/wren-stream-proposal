@@ -4,6 +4,17 @@ _A proposed reference API for wren streams, implemented in wren with no native o
 
 __API explination below__
 
+
+<!-- vim-markdown-toc GFM -->
+* [Abstract](#abstract)
+* [API:](#api)
+   * [Not implemented](#not-implemented)
+      * [Overflow](#overflow)
+
+<!-- vim-markdown-toc -->
+
+## Abstract
+
 These streams would be used to unify the interface for file/stdin/stdout/network reading/writing.
 
 The hope is that once an API for the `Stream` class is decided on, a partially native implementation can be made to improve performance.
@@ -25,3 +36,9 @@ The `Stream` takes 3 flags as config:
 + `writeable`: can the `Stream` be written to in wren land
 + `readable`: can the `Stream` be read from in wren land
 + `readPartialChunk`: if false, the iterating over the stream will only produce chunks of _exactly_ `chunkSize` in length. The last call to `readFiber`, when the `Stream` is closed will produce chunks of any length.
+
+### Not implemented
+
+#### Overflow
+Consider `var overflow = (stream.writeInterface = input)`.
+If `input` will not fully fit in the stream buffer, the remainder is returned to `overflow` so the calling script can push the remaining data into the `Stream`.

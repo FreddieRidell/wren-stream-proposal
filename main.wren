@@ -15,17 +15,16 @@ class Stream {
 	chunkSize { _chunkSize }
 	hasBuffered { this.bytesBuffered != 0 }
 	open { _open }
+
 	readable { _flags & StreamFlags.readable != 0 }
 	writeable { _flags & StreamFlags.writeable != 0 }
 	readPartialChunk { _flags & StreamFlags.readPartialChunk != 0 }
-
-	readFiber=(rf){ _readFiber = rf }
 
 	writeInterface=(input){
 		//add content to the buffer
 		_buffer = _buffer + input
 		//and call our read fiber to read it out
-		_readFiber.call()
+		if(_readFiber) _readFiber.call()
 	}
 	
 	chunkSize=(n) {
@@ -42,21 +41,24 @@ class Stream {
 	}
 	
 	open() {
-		//open the Stream for reading and writing
-		if(readable && !_readFiber){
-			Fiber.abort("Stream is readable, it needs a read fiber")
-		}
-
 		_open = true
 	}
 
 	close(){
 		//close the stream, and let the readFiber read any remaning buffered content
 		_open = false
-		_readFiber.call()
+		if(_readFiber) _readFiber.call()
 	}
 
-	iterate(self){ _open || hasBuffered }
+	iterate(self){
+      if(_open == null){
+         //Stream has not been opened yet
+         _readFiber = Fiber.current
+         Fiber.yield()
+         return true
+      }
+      return _open || hasBuffered
+   }
 
 	iteratorValue(self){
 		//read a chunk from the buffer

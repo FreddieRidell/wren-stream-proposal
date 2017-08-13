@@ -5,37 +5,35 @@ import "random" for Random
 import "./main" for Stream, StreamFlags
 
 var rand = Random.new()
+var printDebugInfo = Fn.new { |x| System.print("\t\t===%(x)===") }
 
 var stream = Stream.new( StreamFlags.writeable | StreamFlags.readable )
 
-stream.readFiber = Fiber.new {
+var readFiber = Fiber.new {
+   printDebugInfo.call("Start read fiber")
 	for( readValue in stream ){
-		System.print("read from Stream: \"%(readValue)\", (%(stream.bytesBuffered) bytes remaining in stream)")
+		System.print("read from Stream:  \"%(readValue)\",\t(%(stream.bytesBuffered) bytes remaining in stream)")
 	}
-
-	System.print("read fiber says: 'fiber has been closed'")
+   printDebugInfo.call("End read fiber")
 }
+readFiber.call()
 
 
-
-
-
-
+printDebugInfo.call("Open Stream")
 stream.open()
-System.print("write fiber says: 'fiber will now be opened'")
-
-for(i in 0..5){
-	var writeValue = "%(rand.int())"
+printDebugInfo.call("Start writing to Stream")
+for(i in 0..3){
+	var writeValue = "_%(rand.int())"
 
 	System.print("writing to Stream: \"%(writeValue)\"")
 
 	stream.writeInterface = writeValue
 
-	System.print("\n===sleeping===\n")
+	printDebugInfo.call("sleeping")
 	Timer.sleep(200)
 }
-
-System.print("write fiber says: 'fiber will now be closed'")
+printDebugInfo.call("Stop writing to Stream")
+printDebugInfo.call("Close Stream")
 stream.close()
 
 System.print("DONE!")
