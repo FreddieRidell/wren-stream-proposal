@@ -11,29 +11,31 @@ var stream = Stream.new( StreamFlags.writeable | StreamFlags.readable )
 
 var readFiber = Fiber.new {
    printDebugInfo.call("Start read fiber")
-	for( readValue in stream ){
-		System.print("read from Stream:  \"%(readValue)\",\t(%(stream.bytesBuffered) bytes remaining in stream)")
+
+	for( chunk in stream.output ){
+		System.print("read from Stream:  \"%(chunk.value)\"")
 	}
+
    printDebugInfo.call("End read fiber")
 }
 readFiber.call()
 
-
 printDebugInfo.call("Open Stream")
 stream.open()
 printDebugInfo.call("Start writing to Stream")
-for(i in 0..3){
-	var writeValue = "_%(rand.int())"
 
-	System.print("writing to Stream: \"%(writeValue)\"")
+var i = 0
+for(chunk in stream.input){
 
-	stream.writeInterface = writeValue
+	chunk.value = "(%(rand.int()))"
 
-	printDebugInfo.call("sleeping")
-	Timer.sleep(200)
+	i = i + 1
+	if(i > 3){
+		printDebugInfo.call("Stop writing to stream")
+		printDebugInfo.call("Close Stream")
+		stream.close()
+	}
 }
-printDebugInfo.call("Stop writing to Stream")
-printDebugInfo.call("Close Stream")
-stream.close()
+
 
 System.print("DONE!")

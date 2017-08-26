@@ -10,6 +10,8 @@ __API explination below__
 * [API:](#api)
    * [Not implemented](#not-implemented)
       * [Overflow](#overflow)
+      * [Pipe](#pipe)
+      * [Transform](#transform)
 
 <!-- vim-markdown-toc -->
 
@@ -42,3 +44,9 @@ The `Stream` takes 3 flags as config:
 #### Overflow
 Consider `var overflow = (stream.writeInterface = input)`.
 If `input` will not fully fit in the stream buffer, the remainder is returned to `overflow` so the calling script can push the remaining data into the `Stream`.
+
+#### Pipe
+Could probably do with a system for pipeing one stream into another
+
+#### Transform
+A `Callable` that transforms the contents of the buffer before it is passed to the read loop
