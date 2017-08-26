@@ -1,28 +1,81 @@
 import "./streamBuffer" for StreamBuffer
+import "./streamChunk" for StreamChunk
 import "./streamInputSequence" for StreamInputSequence
 import "./streamOutputSequence" for StreamOutputSequence
 
 class Stream {
-	input { StreamInputSequence.new(this) }
 	open { _open }
+
+	input {
+		if(!_writeable){
+			Fiber.abort("Can not write to non-writeable stream")
+		}
+		return StreamInputSequence.new(this)
+	}
 	output { 
+		if(!_readable){
+			Fiber.abort("Can not read to non-readable stream")
+		}
+		if(_outputSequence){
+			Fiber.abort("Can only create one StreamOutputSequence for a Stream")
+		}
 		_outputSequence= StreamOutputSequence.new(this)
 		return _outputSequence
 	}
 
-	construct new(flags) {
-		_flags = flags
+	construct readable() {
+		_readable = true
+		_writeable = false
+	}
+
+	construct writeable() {
+		_readable = false
+		_writeable = true
+	}
+
+	construct transform(transform) {
+		_readable = false 
+		_writeable = false
+		_transform = transform
 	}
 
 	open(){
 		_open = true
+
+		if(_pipeToStream){
+			_pipeToStream.open()
+		}
 	}
 
 	close(){
 		_open = false
+		
+		if(_pipeToStream){
+			_pipeToStream.close()
+		}
 	}
 
 	enqueueChunk(chunk){
-		_outputSequence.enqueueChunk(chunk)
+		if(_transform){
+			var transformedChunk = StreamChunk.new()
+			transformedChunk.value = _transform.call(chunk.value)
+			dequeueChunk(transformedChunk)
+		} else {
+			dequeueChunk(chunk)
+		}
+	}
+
+	dequeueChunk(chunk){
+		if(_pipeToStream){
+			_pipeToStream.enqueueChunk(chunk)
+		} else {
+			_outputSequence.dequeueChunk(chunk)
+		}
+	}
+
+	pipe(stream){
+		_pipeToStream = stream
+
+		return stream
 	}
 }

@@ -15,11 +15,10 @@ class StreamInputSequence is Sequence {
 		}
 
 		if(inputChunk is StreamChunk){
-			System.print(inputChunk.value)
 			_stream.enqueueChunk(inputChunk)
 		}
 
-		return StreamChunk.new(this)
+		return StreamChunk.new()
 	}
 
 	iteratorValue(inputChunk){

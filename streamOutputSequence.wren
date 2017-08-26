@@ -6,7 +6,7 @@ class StreamOutputSequence is Sequence {
 		_stream = stream
 	}
 
-	enqueueChunk(chunk){
+	dequeueChunk(chunk){
 		_recievedChunk = chunk
 		_outputFiber.call()
 	}
@@ -24,8 +24,6 @@ class StreamOutputSequence is Sequence {
 			_recievedChunk = null
 			return drain
 		}
-
-		System.print(outputChunk)
 	}
 
 	iteratorValue(outputChunk){
