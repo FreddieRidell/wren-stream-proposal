@@ -1,4 +1,4 @@
-import "./streamChunk" for StreamChunk
+import "./streamChunk" for StreamChunk, ReadableStreamChunk
 
 class StreamOutputSequence is Sequence {
 
@@ -7,7 +7,7 @@ class StreamOutputSequence is Sequence {
 	}
 
 	dequeueChunk(chunk){
-		_recievedChunk = chunk
+		_recievedChunk = ReadableStreamChunk.new(chunk)
 		_outputFiber.call()
 	}
 

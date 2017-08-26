@@ -1,4 +1,4 @@
-import "./streamChunk" for StreamChunk
+import "./streamChunk" for StreamChunk, WriteableStreamChunk
 
 class StreamInputSequence is Sequence {
 
@@ -18,7 +18,7 @@ class StreamInputSequence is Sequence {
 			_stream.enqueueChunk(inputChunk)
 		}
 
-		return StreamChunk.new()
+		return WriteableStreamChunk.new()
 	}
 
 	iteratorValue(inputChunk){

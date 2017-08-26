@@ -1,5 +1,4 @@
-import "./streamBuffer" for StreamBuffer
-import "./streamChunk" for StreamChunk
+import "./streamChunk" for StreamChunk, WriteableStreamChunk, ReadableStreamChunk
 import "./streamInputSequence" for StreamInputSequence
 import "./streamOutputSequence" for StreamOutputSequence
 
@@ -57,8 +56,10 @@ class Stream {
 
 	enqueueChunk(chunk){
 		if(_transform){
-			var transformedChunk = StreamChunk.new()
-			transformedChunk.value = _transform.call(chunk.value)
+			var transformedChunk = ReadableStreamChunk.new(
+				_transform.call(chunk.value)
+			)
+
 			dequeueChunk(transformedChunk)
 		} else {
 			dequeueChunk(chunk)
